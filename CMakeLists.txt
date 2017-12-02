@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.3.0)
+cmake_minimum_required(VERSION 3.8.0)
 
 include(CMakeParseArguments)
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
+include(CheckTypeSize)
 
 function(addprefix var prefix)
     foreach( s ${ARGN} )
@@ -47,36 +48,30 @@ if(ABC_USE_NAMESPACE)
     set(ABC_USE_NAMESPACE_FLAGS "ABC_USE_NAMESPACE=${ABC_USE_NAMESPACE}")
 endif()
 
-# run make to extract compiler options, linker options and list of source files
-execute_process(
-  COMMAND
-    make
-        ${ABC_READLINE_FLAGS}
-        ${ABC_USE_NAMESPACE_FLAGS}
-        ARCHFLAGS_EXE=${CMAKE_CURRENT_BINARY_DIR}/abc_arch_flags_program.exe
-        ABC_MAKE_NO_DEPS=1
-        CC=${CMAKE_C_COMPILER}
-        CXX=${CMAKE_CXX_COMPILER}
-        LD=${CMAKE_CXX_COMPILER}
-        cmake_info
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  OUTPUT_VARIABLE MAKE_OUTPUT
-)
+include(sourcelist.cmake)
 
-# extract options from make output
-function(extract_var SEPARATOR DEST_VARIABLE MAKE_OUTPUT)
-  string(REGEX MATCH "${SEPARATOR} .* ${SEPARATOR}" TMP "${MAKE_OUTPUT}")
-  string(REGEX REPLACE "${SEPARATOR} (.*) ${SEPARATOR}" "\\1" TMP "${TMP}")
+check_type_size("void*" SIZEOF_DATA_PTR)
+CHECK_TYPE_SIZE("long" SIZEOF_LONG)
+CHECK_TYPE_SIZE("int" SIZEOF_INT)
 
-  separate_arguments(TMP)
+if(${SIZEOF_DATA_PTR} MATCHES 8)
+    set(ARCH LIN64)
+else()
+    set(ARCH LIN)
+endif()
 
-  set(${DEST_VARIABLE} ${TMP} PARENT_SCOPE)
-endfunction()
+set(SIZE_DEFS -D${ARCH} -DSIZEOF_VOID_P=${SIZEOF_DATA_PTR} -DSIZEOF_LONG=${SIZEOF_LONG} -DSIZEOF_INT=${SIZEOF_INT})
 
-extract_var(SEPARATOR_SRC ABC_SRC ${MAKE_OUTPUT})
-extract_var(SEPARATOR_LIBS ABC_LIBS ${MAKE_OUTPUT})
-extract_var(SEPARATOR_CFLAGS ABC_CFLAGS ${MAKE_OUTPUT})
-extract_var(SEPARATOR_CXXFLAGS ABC_CXXFLAGS ${MAKE_OUTPUT})
+set(ABC_LIBS -lreadline -lpthread -ldl -lm)
+
+set(OPT_FLAGS -O3 -march=native -mtune=native -fomit-frame-pointer -g0)
+
+set(WARN_FLAGS -Wall -Wno-unused-function -Wno-write-strings -Wno-sign-compare) # -Wextra
+
+set(ABC_CFLAGS ${SIZE_DEFS} ${OPT_FLAGS} ${WARN_FLAGS} -DABC_USE_CUDD=1 -DABC_USE_READLINE -DABC_USE_PTHREADS)
+
+set(ABC_CXXFLAGS  ${OPT_FLAGS} ${WARN_FLAGS} ${SIZE_DEFS} -DABC_USE_CUDD=1 -DABC_USE_READLINE -DABC_USE_PTHREADS)
+
 
 if(ABC_USE_NAMESPACE)
     set_source_files_properties(${ABC_SRC} PROPERTIES LANGUAGE CXX)
@@ -84,20 +79,13 @@ endif()
 
 function(abc_properties target visibility)
     target_include_directories(${target} ${visibility} ${CMAKE_CURRENT_SOURCE_DIR}/src )
-    target_compile_options_filtered(${target} ${visibility} ${ABC_CFLAGS} ${ABC_CXXFLAGS} -Wno-unused-but-set-variable )
+    target_compile_options_filtered(${target} ${visibility} ${ABC_CFLAGS} ${ABC_CXXFLAGS})
     target_link_libraries(${target} ${visibility} ${ABC_LIBS})
 endfunction()
 
-add_executable(abc ${ABC_SRC})
-abc_properties(abc PRIVATE)
-
 list(REMOVE_ITEM ABC_SRC src/base/main/main.c)
 
-add_library(libabc EXCLUDE_FROM_ALL ${ABC_SRC})
+add_library(libabc SHARED EXCLUDE_FROM_ALL ${ABC_SRC})
 abc_properties(libabc PUBLIC)
 set_property(TARGET libabc PROPERTY OUTPUT_NAME abc)
-
-add_library(libabc-pic EXCLUDE_FROM_ALL ${ABC_SRC})
-abc_properties(libabc-pic PUBLIC)
-set_property(TARGET libabc-pic PROPERTY POSITION_INDEPENDENT_CODE ON)
-set_property(TARGET libabc-pic PROPERTY OUTPUT_NAME abc-pic)
+set_property(TARGET libabc PROPERTY POSITION_INDEPENDENT_CODE ON)

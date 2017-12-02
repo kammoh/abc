@@ -817,25 +817,25 @@ int Gia_ManBuiltInSimCheck( Gia_Man_t * p, int iLit0, int iLit1 )
 
     if ( Abc_LitIsCompl(iLit0) )
     {
-        if (  Abc_LitIsCompl(iLit1) )
-            for ( w = 0; w < p->nSimWords; w++ )
-                if ( ~pInfo0[w] & ~pInfo1[w] )
+        if (  Abc_LitIsCompl(iLit1) ) {
+            for (w = 0; w < p->nSimWords; w++)
+                if (~pInfo0[w] & ~pInfo1[w])
                     return 1;
-        else 
-            for ( w = 0; w < p->nSimWords; w++ )
-                if ( ~pInfo0[w] & pInfo1[w] )
+        } else {
+            for (w = 0; w < p->nSimWords; w++)
+                if (~pInfo0[w] & pInfo1[w])
                     return 1;
-    }
-    else 
-    {
-        if (  Abc_LitIsCompl(iLit1) )
-            for ( w = 0; w < p->nSimWords; w++ )
-                if ( pInfo0[w] & ~pInfo1[w] )
+        }
+    } else {
+        if (  Abc_LitIsCompl(iLit1) ) {
+            for (w = 0; w < p->nSimWords; w++)
+                if (pInfo0[w] & ~pInfo1[w])
                     return 1;
-        else 
-            for ( w = 0; w < p->nSimWords; w++ )
-                if ( pInfo0[w] & pInfo1[w] )
+        } else {
+            for (w = 0; w < p->nSimWords; w++)
+                if (pInfo0[w] & pInfo1[w])
                     return 1;
+        }
     }
     return 0;
 }
