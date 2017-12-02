@@ -5,6 +5,7 @@ include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 include(CheckTypeSize)
 
+
 function(addprefix var prefix)
     foreach( s ${ARGN} )
         list(APPEND tmp "-I${s}")
@@ -51,8 +52,8 @@ endif()
 include(sourcelist.cmake)
 
 check_type_size("void*" SIZEOF_DATA_PTR)
-CHECK_TYPE_SIZE("long" SIZEOF_LONG)
-CHECK_TYPE_SIZE("int" SIZEOF_INT)
+check_type_size("long" SIZEOF_LONG)
+check_type_size("int" SIZEOF_INT)
 
 if(${SIZEOF_DATA_PTR} MATCHES 8)
     set(ARCH LIN64)
@@ -60,9 +61,13 @@ else()
     set(ARCH LIN)
 endif()
 
+find_package( ZLIB REQUIRED )
+find_package( BZip2 REQUIRED )
+
+
 set(SIZE_DEFS -D${ARCH} -DSIZEOF_VOID_P=${SIZEOF_DATA_PTR} -DSIZEOF_LONG=${SIZEOF_LONG} -DSIZEOF_INT=${SIZEOF_INT})
 
-set(ABC_LIBS -lreadline -lpthread -ldl -lm)
+set(ABC_LIBS ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} -lreadline -lpthread -ldl -lm)
 
 set(OPT_FLAGS -O3 -march=native -mtune=native -fomit-frame-pointer -g0)
 
@@ -78,14 +83,16 @@ if(ABC_USE_NAMESPACE)
 endif()
 
 function(abc_properties target visibility)
-    target_include_directories(${target} ${visibility} ${CMAKE_CURRENT_SOURCE_DIR}/src )
+    target_include_directories(${target} ${visibility} ${CMAKE_CURRENT_SOURCE_DIR}/src ${ZLIB_INCLUDE_DIRS} ${BZIP2_INCLUDE_DIR})
     target_compile_options_filtered(${target} ${visibility} ${ABC_CFLAGS} ${ABC_CXXFLAGS})
     target_link_libraries(${target} ${visibility} ${ABC_LIBS})
+
 endfunction()
 
 list(REMOVE_ITEM ABC_SRC src/base/main/main.c)
 
-add_library(libabc SHARED EXCLUDE_FROM_ALL ${ABC_SRC})
+add_library(libabc SHARED)
+target_sources(libabc PRIVATE ${ABC_SRC})
 abc_properties(libabc PUBLIC)
 set_property(TARGET libabc PROPERTY OUTPUT_NAME abc)
 set_property(TARGET libabc PROPERTY POSITION_INDEPENDENT_CODE ON)

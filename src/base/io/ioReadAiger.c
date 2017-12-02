@@ -27,7 +27,7 @@
 #include <assert.h>
 
 #include "misc/bzlib/bzlib.h"
-#include "misc/zlib/zlib.h"
+#include "zlib.h"
 #include "ioAbc.h"
 
 ABC_NAMESPACE_IMPL_START

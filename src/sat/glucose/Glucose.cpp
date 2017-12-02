@@ -36,6 +36,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 
 ABC_NAMESPACE_IMPL_START
 
+#include "misc/util/abc_global.h"
+
 using namespace Gluco;
 
 //=================================================================================================

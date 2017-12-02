@@ -18,7 +18,7 @@
 
 ***********************************************************************/
 
-#include "misc/zlib/zlib.h"
+#include "zlib.h"
 #include "misc/bzlib/bzlib.h"
 #include "base/abc/abc.h"
 #include "misc/vec/vecPtr.h"
