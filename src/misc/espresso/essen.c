@@ -1,21 +1,9 @@
 /*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
-/*
     module: essen.c
     purpose: Find essential primes in a multiple-valued function
 */
 
 #include "espresso.h"
-
-ABC_NAMESPACE_IMPL_START
-
 
 /*
     essential -- return a cover consisting of the cubes of F which are
@@ -36,8 +24,7 @@ ABC_NAMESPACE_IMPL_START
     on these primes for essentiality.
 */
 
-pcover essential(Fp, Dp)
-IN pcover *Fp, *Dp;
+pcover essential(pset_family *Fp, pset_family *Dp)
 {
     register pcube last, p;
     pcover E, F = *Fp, D = *Dp;
@@ -80,9 +67,7 @@ IN pcover *Fp, *Dp;
 
     does not contain c.
 */
-bool essen_cube(F, D, c)
-IN pcover F, D;
-IN pcube c;
+bool essen_cube(pset_family F, pset_family D, pset c)
 {
     pcover H, FD;
     pcube *H1;
@@ -106,9 +91,7 @@ IN pcube c;
 /*
  *  cb_consensus -- compute consensus(T # c, c)
  */
-pcover cb_consensus(T, c)
-register pcover T;
-register pcube c;
+pcover cb_consensus(register pset_family T, register pset c)
 {
     register pcube temp, last, p;
     register pcover R;
@@ -140,9 +123,7 @@ register pcube c;
  *  form the sharp-consensus for p and c when they intersect
  *  What we are forming is consensus(p # c, c).
  */
-pcover cb_consensus_dist0(R, p, c)
-pcover R;
-register pcube p, c;
+pcover cb_consensus_dist0(pset_family R, register pset p, register pset c)
 {
     int var;
     bool got_one;
@@ -180,5 +161,3 @@ register pcube p, c;
     set_free(temp);
     return R;
 }
-ABC_NAMESPACE_IMPL_END
-

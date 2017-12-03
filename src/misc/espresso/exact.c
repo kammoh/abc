@@ -1,20 +1,8 @@
-/*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
 #include "espresso.h"
 
-ABC_NAMESPACE_IMPL_START
 
-
-
-static void dump_irredundant();
-static pcover do_minimize();
+static void dump_irredundant(pset_family E, pset_family Rt, pset_family Rp, sm_matrix *table);
+static pcover do_minimize(pset_family F, pset_family D, pset_family R, int exact_cover, int weighted);
 
 
 /*
@@ -27,18 +15,14 @@ static pcover do_minimize();
  */
 
 pcover
-minimize_exact(F, D, R, exact_cover)
-pcover F, D, R;
-int exact_cover;
+minimize_exact(pset_family F, pset_family D, pset_family R, int exact_cover)
 {
     return do_minimize(F, D, R, exact_cover, /*weighted*/ 0);
 }
 
 
 pcover
-minimize_exact_literals(F, D, R, exact_cover)
-pcover F, D, R;
-int exact_cover;
+minimize_exact_literals(pset_family F, pset_family D, pset_family R, int exact_cover)
 {
     return do_minimize(F, D, R, exact_cover, /*weighted*/ 1);
 }
@@ -46,14 +30,11 @@ int exact_cover;
 
 
 static pcover
-do_minimize(F, D, R, exact_cover, weighted)
-pcover F, D, R;
-int exact_cover;
-int weighted;
+do_minimize(pset_family F, pset_family D, pset_family R, int exact_cover, int weighted)
 {
     pcover newF, E, Rt, Rp;
     pset p, last;
-    int heur, level, *weights, i;
+    int heur, level, *weights;
     sm_matrix *table;
     sm_row *cover;
     sm_element *pe;
@@ -83,12 +64,6 @@ int weighted;
 	weights = ALLOC(int, F->count);
 	foreach_set(Rp, last, p) {
 	    weights[SIZE(p)] = cube.size - set_ord(p);
-	    /* We have added the 0's in the output part instead of the 1's.
-	       This loop corrects the literal count. */
-	    for (i = cube.first_part[cube.output];
-		 i <= cube.last_part[cube.output]; i++) {
-		is_in_set(p, i) ? weights[SIZE(p)]++ : weights[SIZE(p)]--;
-	    }
 	}
     } else {
 	weights = NIL(int);
@@ -129,9 +104,7 @@ int weighted;
 }
 
 static void
-dump_irredundant(E, Rt, Rp, table)
-pcover E, Rt, Rp;
-sm_matrix *table;
+dump_irredundant(pset_family E, pset_family Rt, pset_family Rp, sm_matrix *table)
 {
     FILE *fp_pi_table, *fp_primes;
     pPLA PLA;
@@ -144,12 +117,12 @@ sm_matrix *table;
 	file = ALLOC(char, strlen(filename)+20);
 	(void) sprintf(file, "%s.primes", filename);
 	if ((fp_primes = fopen(file, "w")) == NULL) {
-	    (void) fprintf(stderr, "espresso: Unable to open %s\n", file);
+	    fprintf(stderr, "espresso: Unable to open %s\n", file);
 	    fp_primes = stdout;
 	}
 	(void) sprintf(file, "%s.pi", filename);
 	if ((fp_pi_table = fopen(file, "w")) == NULL) {
-	    (void) fprintf(stderr, "espresso: Unable to open %s\n", file);
+	    fprintf(stderr, "espresso: Unable to open %s\n", file);
 	    fp_pi_table = stdout;
 	}
 	FREE(file);
@@ -165,11 +138,11 @@ sm_matrix *table;
     foreach_set(E, last, p) {
 	(void) fprintf(fp_primes, "%s\n", pc1(p));
     }
-    (void) fprintf(fp_primes, "# Totally redundant primes are\n");
+    fprintf(fp_primes, "# Totally redundant primes are\n");
     foreach_set(Rt, last, p) {
 	(void) fprintf(fp_primes, "%s\n", pc1(p));
     }
-    (void) fprintf(fp_primes, "# Partially redundant primes are\n");
+    fprintf(fp_primes, "# Partially redundant primes are\n");
     foreach_set(Rp, last, p) {
 	(void) fprintf(fp_primes, "%s\n", pc1(p));
     }
@@ -182,5 +155,3 @@ sm_matrix *table;
 	(void) fclose(fp_pi_table);
     }
 }
-ABC_NAMESPACE_IMPL_END
-

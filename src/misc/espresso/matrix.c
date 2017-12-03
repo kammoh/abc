@@ -1,17 +1,5 @@
-/*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
-//#include "port.h"
+#include "port.h"
 #include "sparse_int.h"
-
-ABC_NAMESPACE_IMPL_START
-
 
 /*
  *  free-lists are only used if 'FAST_AND_LOOSE' is set; this is because
@@ -28,7 +16,7 @@ sm_col *sm_col_freelist;
 
 
 sm_matrix *
-sm_alloc()
+sm_alloc(void)
 {
     register sm_matrix *A;
 
@@ -45,8 +33,7 @@ sm_alloc()
 
 
 sm_matrix *
-sm_alloc_size(row, col)
-int row, col;
+sm_alloc_size(int row, int col)
 {
     register sm_matrix *A;
 
@@ -57,8 +44,7 @@ int row, col;
 
 
 void
-sm_free(A)
-sm_matrix *A;
+sm_free(sm_matrix *A)
 {
 #ifdef FAST_AND_LOOSE
     register sm_row *prow;
@@ -101,8 +87,7 @@ sm_matrix *A;
 
 
 sm_matrix *
-sm_dup(A)
-sm_matrix *A; 
+sm_dup(sm_matrix *A)
 {
     register sm_row *prow;
     register sm_element *p;
@@ -122,9 +107,7 @@ sm_matrix *A;
 
 
 void 
-sm_resize(A, row, col)
-register sm_matrix *A;
-int row, col;
+sm_resize(register sm_matrix *A, int row, int col)
 {
     register int i, new_size;
 
@@ -152,9 +135,7 @@ int row, col;
  *  insert -- insert a value into the matrix
  */
 sm_element *
-sm_insert(A, row, col)
-register sm_matrix *A;
-register int row, col;
+sm_insert(register sm_matrix *A, register int row, register int col)
 {
     register sm_row *prow;
     register sm_col *pcol;
@@ -202,9 +183,7 @@ register int row, col;
 
 
 sm_element *
-sm_find(A, rownum, colnum)
-sm_matrix *A;
-int rownum, colnum;
+sm_find(sm_matrix *A, int rownum, int colnum)
 {
     sm_row *prow;
     sm_col *pcol;
@@ -227,9 +206,7 @@ int rownum, colnum;
 
 
 void
-sm_remove(A, rownum, colnum)
-sm_matrix *A;
-int rownum, colnum;
+sm_remove(sm_matrix *A, int rownum, int colnum)
 {
     sm_remove_element(A, sm_find(A, rownum, colnum));
 }
@@ -237,9 +214,7 @@ int rownum, colnum;
 
 
 void
-sm_remove_element(A, p)
-register sm_matrix *A; 
-register sm_element *p;
+sm_remove_element(register sm_matrix *A, register sm_element *p)
 {
     register sm_row *prow;
     register sm_col *pcol;
@@ -270,9 +245,7 @@ register sm_element *p;
 }
 
 void 
-sm_delrow(A, i)
-sm_matrix *A;
-int i;
+sm_delrow(sm_matrix *A, int i)
 {
     register sm_element *p, *pnext;
     sm_col *pcol;
@@ -304,9 +277,7 @@ int i;
 }
 
 void 
-sm_delcol(A, i)
-sm_matrix *A;
-int i;
+sm_delcol(sm_matrix *A, int i)
 {
     register sm_element *p, *pnext;
     sm_row *prow;
@@ -338,10 +309,7 @@ int i;
 }
 
 void
-sm_copy_row(dest, dest_row, prow)
-register sm_matrix *dest;
-int dest_row;
-sm_row *prow;
+sm_copy_row(register sm_matrix *dest, int dest_row, sm_row *prow)
 {
     register sm_element *p;
 
@@ -352,10 +320,7 @@ sm_row *prow;
 
 
 void
-sm_copy_col(dest, dest_col, pcol)
-register sm_matrix *dest;
-int dest_col;
-sm_col *pcol;
+sm_copy_col(register sm_matrix *dest, int dest_col, sm_col *pcol)
 {
     register sm_element *p;
 
@@ -366,8 +331,7 @@ sm_col *pcol;
 
 
 sm_row *
-sm_longest_row(A)
-sm_matrix *A;
+sm_longest_row(sm_matrix *A)
 {
     register sm_row *large_row, *prow;
     register int max_length;
@@ -385,8 +349,7 @@ sm_matrix *A;
 
 
 sm_col *
-sm_longest_col(A)
-sm_matrix *A;
+sm_longest_col(sm_matrix *A)
 {
     register sm_col *large_col, *pcol;
     register int max_length;
@@ -403,8 +366,7 @@ sm_matrix *A;
 }
 
 int
-sm_num_elements(A)
-sm_matrix *A;
+sm_num_elements(sm_matrix *A)
 {
     register sm_row *prow;
     register int num;
@@ -417,9 +379,7 @@ sm_matrix *A;
 }
 
 int 
-sm_read(fp, A)
-FILE *fp;
-sm_matrix **A;
+sm_read(FILE *fp, sm_matrix **A)
 {
     int i, j, err;
 
@@ -438,9 +398,7 @@ sm_matrix **A;
 
 
 int 
-sm_read_compressed(fp, A)
-FILE *fp;
-sm_matrix **A;
+sm_read_compressed(FILE *fp, sm_matrix **A)
 {
     int i, j, k, nrows, ncols;
     unsigned long x;
@@ -471,9 +429,7 @@ sm_matrix **A;
 
 
 void 
-sm_write(fp, A)
-FILE *fp;
-sm_matrix *A;
+sm_write(FILE *fp, sm_matrix *A)
 {
     register sm_row *prow;
     register sm_element *p;
@@ -486,9 +442,7 @@ sm_matrix *A;
 }
 
 void 
-sm_print(fp, A)
-FILE *fp;
-sm_matrix *A;
+sm_print(FILE *fp, sm_matrix *A)
 {
     register sm_row *prow;
     register sm_col *pcol;
@@ -535,10 +489,7 @@ sm_matrix *A;
 
 
 void 
-sm_dump(A, s, max)
-sm_matrix *A;
-char *s;
-int max;
+sm_dump(sm_matrix *A, char *s, int max)
 {
     FILE *fp = stdout;
 
@@ -549,7 +500,7 @@ int max;
 }
 
 void
-sm_cleanup()
+sm_cleanup(void)
 {
 #ifdef FAST_AND_LOOSE
     register sm_element *p, *pnext;
@@ -575,5 +526,3 @@ sm_cleanup()
     sm_col_freelist = 0;
 #endif
 }
-ABC_NAMESPACE_IMPL_END
-

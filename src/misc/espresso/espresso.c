@@ -1,13 +1,4 @@
 /*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
-/*
  *  Module: espresso.c
  *  Purpose: The main espresso algorithm
  *
@@ -47,11 +38,7 @@
 
 #include "espresso.h"
 
-ABC_NAMESPACE_IMPL_START
-
-
-pcover espresso(F, D1, R)
-pcover F, D1, R;
+pcover espresso(pset_family F, pset_family D1, pset_family R)
 {
     pcover E, D, Fsave;
     pset last, p;
@@ -140,5 +127,3 @@ begin:
 
     return F;
 }
-ABC_NAMESPACE_IMPL_END
-

@@ -1,13 +1,4 @@
 /*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
-/*
     module: sparse.c
 
     make_sparse is a last-step cleanup to reduce the total number
@@ -20,11 +11,7 @@
 
 #include "espresso.h"
 
-ABC_NAMESPACE_IMPL_START
-
-
-pcover make_sparse(F, D, R)
-pcover F, D, R;
+pcover make_sparse(pset_family F, pset_family D, pset_family R)
 {
     cost_t cost, best_cost;
 
@@ -60,8 +47,7 @@ pcover F, D, R;
 */
 
 pcover
-mv_reduce(F, D)
-pcover F, D;
+mv_reduce(pset_family F, pset_family D)
 {
     register int i, var;
     register pcube p, p1, last;
@@ -147,5 +133,3 @@ pcover F, D;
     }
     return F;
 }
-ABC_NAMESPACE_IMPL_END
-

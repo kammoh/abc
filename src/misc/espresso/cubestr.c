@@ -1,20 +1,8 @@
 /*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
-/*
     Module: cubestr.c -- routines for managing the global cube structure
 */
 
 #include "espresso.h"
-
-ABC_NAMESPACE_IMPL_START
-
 
 /*
     cube_setup -- assume that the fields "num_vars", "num_binary_vars", and
@@ -24,7 +12,7 @@ ABC_NAMESPACE_IMPL_START
     If a part_size is < 0, then the field size is abs(part_size) and the
     field read from the input is symbolic.
 */
-void cube_setup()
+void cube_setup(void)
 {
     register int i, var;
     register pcube p;
@@ -92,7 +80,7 @@ void cube_setup()
     (I wanted to call this cube_setdown, but that violates the 8-character
     external routine limit on the IBM !)
 */
-void setdown_cube()
+void setdown_cube(void)
 {
     register int i, var;
 
@@ -131,7 +119,7 @@ void setdown_cube()
 }
 
 
-void save_cube_struct()
+void save_cube_struct(void)
 {
     temp_cube_save = cube;              /* structure copy ! */
     temp_cdata_save = cdata;            /*      ""          */
@@ -148,10 +136,8 @@ void save_cube_struct()
 }
 
 
-void restore_cube_struct()
+void restore_cube_struct(void)
 {
     cube = temp_cube_save;              /* structure copy ! */
     cdata = temp_cdata_save;            /*      ""          */
 }
-ABC_NAMESPACE_IMPL_END
-

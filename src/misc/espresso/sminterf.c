@@ -1,21 +1,8 @@
-/*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
 #include "espresso.h"
-
-ABC_NAMESPACE_IMPL_START
-
 
 
 pset
-do_sm_minimum_cover(A)
-pset_family A;
+do_sm_minimum_cover(pset_family A)
 {
     sm_matrix *M;
     sm_row *sparse_cover;
@@ -45,5 +32,3 @@ pset_family A;
 
     return cover;
 }
-ABC_NAMESPACE_IMPL_END
-

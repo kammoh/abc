@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8.0)
+cmake_minimum_required(VERSION 3.10.0)
 
 include(CMakeParseArguments)
 include(CheckCCompilerFlag)
@@ -49,8 +49,6 @@ if(ABC_USE_NAMESPACE)
     set(ABC_USE_NAMESPACE_FLAGS "ABC_USE_NAMESPACE=${ABC_USE_NAMESPACE}")
 endif()
 
-include(sourcelist.cmake)
-
 check_type_size("void*" SIZEOF_DATA_PTR)
 check_type_size("long" SIZEOF_LONG)
 check_type_size("int" SIZEOF_INT)
@@ -82,17 +80,47 @@ if(ABC_USE_NAMESPACE)
     set_source_files_properties(${ABC_SRC} PROPERTIES LANGUAGE CXX)
 endif()
 
-function(abc_properties target visibility)
-    target_include_directories(${target} ${visibility} ${CMAKE_CURRENT_SOURCE_DIR}/src ${ZLIB_INCLUDE_DIRS} ${BZIP2_INCLUDE_DIR})
-    target_compile_options_filtered(${target} ${visibility} ${ABC_CFLAGS} ${ABC_CXXFLAGS})
-    target_link_libraries(${target} ${visibility} ${ABC_LIBS})
 
-endfunction()
 
-list(REMOVE_ITEM ABC_SRC src/base/main/main.c)
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+
+# the RPATH to be used when installing, but only if it's not a system directory
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+IF("${isSystemDir}" STREQUAL "-1")
+    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ENDIF("${isSystemDir}" STREQUAL "-1")
 
 add_library(libabc SHARED)
-target_sources(libabc PRIVATE ${ABC_SRC})
-abc_properties(libabc PUBLIC)
+
+include_directories(src)
+
+target_include_directories(libabc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src ${ZLIB_INCLUDE_DIRS} ${BZIP2_INCLUDE_DIR})
+target_compile_options_filtered(libabc PUBLIC ${ABC_CFLAGS} ${ABC_CXXFLAGS})
+target_link_libraries(libabc PUBLIC ${ABC_LIBS})
+
 set_property(TARGET libabc PROPERTY OUTPUT_NAME abc)
+set_target_properties(libabc PROPERTIES VERSION 0.1.0)
+set_target_properties(libabc PROPERTIES SOVERSION 0.1.0)
 set_property(TARGET libabc PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+add_subdirectory(src)
+
+add_executable(abc src/base/main/main.c)
+target_include_directories(abc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(abc libabc)
+
+add_executable(demo src/demo.c)
+target_include_directories(demo PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(demo libabc)

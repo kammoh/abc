@@ -1,23 +1,8 @@
-/*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
 #include "mincov_int.h"
 
-ABC_NAMESPACE_IMPL_START
-
-
-static int visit_col();
 
 static void
-copy_row(A, prow)
-register sm_matrix *A;
-register sm_row *prow;
+copy_row(register sm_matrix *A, register sm_row *prow)
 {
     register sm_element *p;
 
@@ -26,13 +11,34 @@ register sm_row *prow;
     }
 }
 
+static int visit_row(sm_matrix *A, sm_row *prow, int *rows_visited, int *cols_visited);
 
 static int
-visit_row(A, prow, rows_visited, cols_visited)
-sm_matrix *A;
-sm_row *prow;
-int *rows_visited;
-int *cols_visited;
+visit_col(sm_matrix *A, sm_col *pcol, int *rows_visited, int *cols_visited)
+{
+    sm_element *p;
+    sm_row *prow;
+
+    if (! pcol->flag) {
+	pcol->flag = 1;
+	(*cols_visited)++;
+	if (*cols_visited == A->ncols) {
+	    return 1;
+	}
+	for(p = pcol->first_row; p != 0; p = p->next_row) {
+	    prow = sm_get_row(A, p->row_num);
+	    if (! prow->flag) {
+		if (visit_row(A, prow, rows_visited, cols_visited)) {
+		    return 1;
+		}
+	    }
+	}
+    }
+    return 0;
+}
+
+static int
+visit_row(sm_matrix *A, sm_row *prow, int *rows_visited, int *cols_visited)
 {
     sm_element *p;
     sm_col *pcol;
@@ -56,38 +62,9 @@ int *cols_visited;
 }
 
 
-static int
-visit_col(A, pcol, rows_visited, cols_visited)
-sm_matrix *A;
-sm_col *pcol;
-int *rows_visited;
-int *cols_visited;
-{
-    sm_element *p;
-    sm_row *prow;
-
-    if (! pcol->flag) {
-	pcol->flag = 1;
-	(*cols_visited)++;
-	if (*cols_visited == A->ncols) {
-	    return 1;
-	}
-	for(p = pcol->first_row; p != 0; p = p->next_row) {
-	    prow = sm_get_row(A, p->row_num);
-	    if (! prow->flag) {
-		if (visit_row(A, prow, rows_visited, cols_visited)) {
-		    return 1;
-		}
-	    }
-	}
-    }
-    return 0;
-}
 
 int
-sm_block_partition(A, L, R)
-sm_matrix *A;
-sm_matrix **L, **R;
+sm_block_partition(sm_matrix *A, sm_matrix **L, sm_matrix **R)
 {
     int cols_visited, rows_visited;
     register sm_row *prow;
@@ -123,5 +100,3 @@ sm_matrix **L, **R;
 	return 1;
     }
 }
-ABC_NAMESPACE_IMPL_END
-

@@ -1,16 +1,4 @@
-/*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
 #include "espresso.h"
-
-ABC_NAMESPACE_IMPL_START
-
 
 /*
  *   Phase assignment technique (T. Sasao):
@@ -62,11 +50,9 @@ ABC_NAMESPACE_IMPL_START
 static int opo_no_make_sparse;
 static int opo_repeated;
 static int opo_exact;
-static void minimize();
+static void minimize(pPLA PLA);
 
-void phase_assignment(PLA, opo_strategy)
-pPLA PLA;
-int opo_strategy;
+void phase_assignment(pPLA PLA, int opo_strategy)
 {
     opo_no_make_sparse = opo_strategy % 2;
     skip_make_sparse = opo_no_make_sparse;
@@ -96,8 +82,7 @@ int opo_strategy;
  *  to a single phase assignment a step at a time.  Performs m + 1
  *  minimizations !
  */
-void repeated_phase_assignment(PLA)
-pPLA PLA;
+void repeated_phase_assignment(pPLA PLA)
 {
     int i;
     pcube phase;
@@ -126,10 +111,7 @@ pPLA PLA;
  *  find_phase -- find a phase assignment for the PLA for all outputs starting
  *  with output number first_output.
  */
-pcube find_phase(PLA, first_output, phase1)
-pPLA PLA;
-int first_output;
-pcube phase1;
+pcube find_phase(pPLA PLA, int first_output, pset phase1)
 {
     pcube phase;
     pPLA PLA1;
@@ -170,10 +152,7 @@ pcube phase1;
  */
 
 /*ARGSUSED*/
-pcover opo(phase, T, D, R, first_output)
-pcube phase;
-pcover T, D, R;
-int first_output;
+pcover opo(pset phase, pset_family T, pset_family D, pset_family R, int first_output)
 {
     int offset, output, i, last_output, ind;
     pset pdest, select, p, p1, last, last1, not_covered, tmp;
@@ -237,10 +216,7 @@ int first_output;
     return T1;
 }
 
-pset_family opo_recur(T, D, select, offset, first, last)
-pcover T, D;
-pcube select;
-int offset, first, last;
+pset_family opo_recur(pset_family T, pset_family D, pset select, int offset, int first, int last)
 {
     static int level = 0;
     int middle;
@@ -275,10 +251,7 @@ int offset, first, last;
 }
 
 
-pset_family opo_leaf(T, select, out1, out2)
-register pcover T;
-pset select;
-int out1, out2;
+pset_family opo_leaf(register pset_family T, pset select, int out1, int out2)
 {
     register pset_family temp;
     register pset p, pdest;
@@ -414,9 +387,7 @@ int n;
  *  duplicated in the output part
  */
 
-void output_phase_setup(PLA, first_output)
-INOUT pPLA PLA;
-int first_output;
+void output_phase_setup(pPLA PLA, int first_output)
 {
     pcover F, R, D;
     pcube mask, mask1, last;
@@ -504,8 +475,7 @@ int first_output;
  *  set_phase -- given a "cube" which describes which phases of the output
  *  are to be implemented, compute the appropriate on-set and off-set
  */
-pPLA set_phase(PLA)
-INOUT pPLA PLA;
+pPLA set_phase(pPLA PLA)
 {
     pcover F1, R1;
     register pcube last, p, outmask;
@@ -538,10 +508,7 @@ INOUT pPLA PLA;
 
 #define POW2(x)		(1 << (x))
 
-void opoall(PLA, first_output, last_output, opo_strategy)
-pPLA PLA;
-int first_output, last_output;
-int opo_strategy;
+void opoall(pPLA PLA, int first_output, int last_output, int opo_strategy)
 {
     pcover F, D, R, best_F, best_D, best_R;
     int i, j, ind, num;
@@ -616,8 +583,7 @@ int opo_strategy;
     PLA->R = best_R;
 }
 
-static void minimize(PLA)
-pPLA PLA;
+static void minimize(pPLA PLA)
 {
     if (opo_exact) {
 	EXEC_S(PLA->F = minimize_exact(PLA->F,PLA->D,PLA->R,1), "EXACT", PLA->F);
@@ -625,5 +591,3 @@ pPLA PLA;
 	EXEC_S(PLA->F = espresso(PLA->F, PLA->D, PLA->R), "ESPRESSO  ",PLA->F);
     }
 }
-ABC_NAMESPACE_IMPL_END
-

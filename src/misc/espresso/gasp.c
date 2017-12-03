@@ -1,13 +1,4 @@
 /*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
-/*
     module: gasp.c
 
     The "last_gasp" heuristic computes the reduction of each cube in
@@ -26,9 +17,6 @@
 
 #include "espresso.h"
 
-ABC_NAMESPACE_IMPL_START
-
-
 
 /*
  *  reduce_gasp -- compute the maximal reduction of each cube of F
@@ -41,8 +29,7 @@ ABC_NAMESPACE_IMPL_START
  *  reduce are marked "NONPRIME"; those that reduced are marked "PRIME".
  *  The cubes are in the same order as in F.
  */
-static pcover reduce_gasp(F, D)
-pcover F, D;
+static pcover reduce_gasp(pset_family F, pset_family D)
 {
     pcube p, last, cunder, *FD;
     pcover G;
@@ -80,11 +67,7 @@ pcover F, D;
  *  regardless of whether they become covered or not.
  */
 
-pcover expand_gasp(F, D, R, Foriginal)
-INOUT pcover F;
-IN pcover D;
-IN pcover R;
-IN pcover Foriginal;
+pcover expand_gasp(pset_family F, pset_family D, pset_family R, pset_family Foriginal)
 {
     int c1index;
     pcover G;
@@ -104,13 +87,13 @@ IN pcover Foriginal;
 /*
  *  expand1 -- Expand a single cube against the OFF-set, using the gasp strategy
  */
-void expand1_gasp(F, D, R, Foriginal, c1index, G)
-pcover F;		/* reduced cubes of ON-set */
-pcover D;		/* DC-set */
-pcover R;		/* OFF-set */
-pcover Foriginal;	/* ON-set before reduction (same order as F) */
-int c1index;		/* which index of F (or Freduced) to be checked */
-pcover *G;
+void expand1_gasp(pset_family F, pset_family D, pset_family R, pset_family Foriginal, int c1index, pset_family *G)
+         		/* reduced cubes of ON-set */
+         		/* DC-set */
+         		/* OFF-set */
+                 	/* ON-set before reduction (same order as F) */
+            		/* which index of F (or Freduced) to be checked */
+          
 {
     register int c2index;
     register pcube p, last, c2under;
@@ -189,8 +172,8 @@ pcover *G;
 }
 
 /* irred_gasp -- Add new primes to F and find an irredundant subset */
-pcover irred_gasp(F, D, G)
-pcover F, D, G;                 /* G is disposed of */
+pcover irred_gasp(pset_family F, pset_family D, pset_family G)
+                                /* G is disposed of */
 {
     if (G->count != 0)
 	F = irredundant(sf_append(F, G), D);
@@ -201,9 +184,7 @@ pcover F, D, G;                 /* G is disposed of */
 
 
 /* last_gasp */
-pcover last_gasp(F, D, R, cost)
-pcover F, D, R;
-cost_t *cost;
+pcover last_gasp(pset_family F, pset_family D, pset_family R, cost_t *cost)
 {
     pcover G, G1;
 
@@ -216,9 +197,7 @@ cost_t *cost;
 
 
 /* super_gasp */
-pcover super_gasp(F, D, R, cost)
-pcover F, D, R;
-cost_t *cost;
+pcover super_gasp(pset_family F, pset_family D, pset_family R, cost_t *cost)
 {
     pcover G, G1;
 
@@ -229,5 +208,3 @@ cost_t *cost;
     EXECUTE(F = irredundant(G, D), IRRED_TIME, F, *cost);
     return F;
 }
-ABC_NAMESPACE_IMPL_END
-

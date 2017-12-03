@@ -1,17 +1,6 @@
-/*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
-//#include "port.h"
-//#include "utility.h"
+#include "port.h"
+#include "utility.h"
 #include "sparse.h"
-
-#include "util_hack.h" // added
 
 
 
@@ -30,7 +19,7 @@
  *  e: an object to use if insertion needed (set to actual value used)
  */
 
-#define ABC__misc__espresso__sparse_int_h
+#define sorted_insert(type, first, last, count, next, prev, value, newval, e) \
     if (last == 0) { \
 	e->value = newval; \
 	first = e; \
@@ -115,7 +104,7 @@ extern sm_col *sm_col_freelist;
 #endif
 
 
-extern void sm_row_remove_element();
-extern void sm_col_remove_element();
+extern void sm_row_remove_element(register sm_row *prow, register sm_element *p);
+extern void sm_col_remove_element(register sm_col *pcol, register sm_element *p);
 
 /* LINTLIBRARY */

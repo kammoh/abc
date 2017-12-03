@@ -26,7 +26,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "misc/bzlib/bzlib.h"
+#include "bzlib.h"
 #include "zlib.h"
 #include "ioAbc.h"
 

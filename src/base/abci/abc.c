@@ -11570,7 +11570,7 @@ int Abc_CommandEspresso( Abc_Frame_t * pAbc, int argc, char ** argv )
     Abc_Ntk_t * pNtk = Abc_FrameReadNtk(pAbc);
     int c;
     int fVerbose;
-    extern void Abc_NtkEspresso( Abc_Ntk_t * pNtk, int fVerbose );
+    extern void AC( Abc_Ntk_t * pNtk, int fVerbose );
 
     if ( argc == 2 && !strcmp(argv[1], "-h") )
     {

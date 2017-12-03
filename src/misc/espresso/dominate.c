@@ -1,21 +1,8 @@
-/*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
 #include "mincov_int.h"
-
-ABC_NAMESPACE_IMPL_START
-
 
 
 int 
-sm_row_dominance(A)
-sm_matrix *A; 
+sm_row_dominance(sm_matrix *A)
 {
     register sm_row *prow, *prow1;
     register sm_col *pcol, *least_col;
@@ -55,9 +42,7 @@ sm_matrix *A;
 }
 
 int 
-sm_col_dominance(A, weight)
-sm_matrix *A;
-int *weight;
+sm_col_dominance(sm_matrix *A, int *weight)
 {
     register sm_row *prow;
     register sm_col *pcol, *pcol1;
@@ -99,5 +84,3 @@ int *weight;
 
     return colcnt - A->ncols;
 }
-ABC_NAMESPACE_IMPL_END
-

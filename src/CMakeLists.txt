@@ -1,0 +1,11 @@
+add_subdirectory(aig)
+add_subdirectory(base)
+add_subdirectory(bdd)
+add_subdirectory(bool)
+add_subdirectory(map)
+add_subdirectory(misc)
+add_subdirectory(opt)
+add_subdirectory(proof)
+add_subdirectory(phys)
+add_subdirectory(sat)
+

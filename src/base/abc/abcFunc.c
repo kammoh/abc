@@ -377,7 +377,7 @@ int Abc_NtkBddToSop( Abc_Ntk_t * pNtk, int fMode, int nCubeLimit )
         Abc_NtkForEachNode( pNtk, pNode, i )
             if ( !Abc_ObjIsBarBuf(pNode) )
                 Vec_PtrWriteEntry( vFuncs, i, pNode->pData );
-        // compute the number of cubes in the ISOPs and detemine polarity
+        // compute the number of cubes in the ISOPs and determine polarity
         nCubes = Extra_bddCountCubes( dd, (DdNode **)Vec_PtrArray(vFuncs), Vec_PtrSize(vFuncs), fMode, nCubeLimit, Vec_IntArray(vGuide) );
         Vec_PtrFree( vFuncs );
         if ( nCubes == -1 )

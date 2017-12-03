@@ -1,20 +1,7 @@
-/*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
 #include "espresso.h"
 
-ABC_NAMESPACE_IMPL_START
 
-
-
-void find_equiv_outputs(PLA)
-pPLA PLA;
+void find_equiv_outputs(pPLA PLA)
 {
     int i, j, ipart, jpart, some_equiv;
     pcover *R, *F;
@@ -38,19 +25,19 @@ pPLA PLA;
 	    jpart = cube.first_part[cube.output] + j;
 
 	    if (check_equiv(F[i], F[j])) {
-		(void) printf("# Outputs %d and %d (%s and %s) are equivalent\n",
+		printf("# Outputs %d and %d (%s and %s) are equivalent\n",
 		    i, j, PLA->label[ipart], PLA->label[jpart]);
 		some_equiv = TRUE;
 	    } else if (check_equiv(F[i], R[j])) {
-		(void) printf("# Outputs %d and NOT %d (%s and %s) are equivalent\n",
+		printf("# Outputs %d and NOT %d (%s and %s) are equivalent\n",
 		    i, j, PLA->label[ipart], PLA->label[jpart]);
 		some_equiv = TRUE;
 	    } else if (check_equiv(R[i], F[j])) {
-		(void) printf("# Outputs NOT %d and %d (%s and %s) are equivalent\n",
+		printf("# Outputs NOT %d and %d (%s and %s) are equivalent\n",
 		    i, j, PLA->label[ipart], PLA->label[jpart]);
 		some_equiv = TRUE;
 	    } else if (check_equiv(R[i], R[j])) {
-	    (void) printf("# Outputs NOT %d and NOT %d (%s and %s) are equivalent\n",
+	    printf("# Outputs NOT %d and NOT %d (%s and %s) are equivalent\n",
 		    i, j, PLA->label[ipart], PLA->label[jpart]);
 		some_equiv = TRUE;
 	    }
@@ -58,7 +45,7 @@ pPLA PLA;
     }
 
     if (! some_equiv) {
-	(void) printf("# No outputs are equivalent\n");
+	printf("# No outputs are equivalent\n");
     }
 
     for(i = 0; i < cube.part_size[cube.output]; i++) {
@@ -71,8 +58,7 @@ pPLA PLA;
 
 
 
-int check_equiv(f1, f2)
-pcover f1, f2;
+int check_equiv(pset_family f1, pset_family f2)
 {
     register pcube *f1list, *f2list;
     register pcube p, last;
@@ -95,5 +81,3 @@ pcover f1, f2;
 
     return TRUE;
 }
-ABC_NAMESPACE_IMPL_END
-

@@ -19,7 +19,7 @@
 ***********************************************************************/
 
 #include "zlib.h"
-#include "misc/bzlib/bzlib.h"
+#include "bzlib.h"
 #include "base/abc/abc.h"
 #include "misc/vec/vecPtr.h"
 #include "ioAbc.h"

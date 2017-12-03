@@ -1,0 +1,37 @@
+target_sources(libabc PRIVATE src/proof/pdr/pdrCnf.c src/proof/pdr/pdrCore.c
+        src/proof/pdr/pdrIncr.c src/proof/pdr/pdrInv.c src/proof/pdr/pdrMan.c src/proof/pdr/pdrSat.c
+        src/proof/pdr/pdrTsim.c src/proof/pdr/pdrTsim2.c src/proof/pdr/pdrTsim3.c src/proof/pdr/pdrUtil.c
+        src/proof/abs/absDup.c src/proof/abs/absGla.c src/proof/abs/absGlaOld.c src/proof/abs/absIter.c
+        src/proof/abs/absOldCex.c src/proof/abs/absOldRef.c src/proof/abs/absOldSat.c src/proof/abs/absOldSim.c
+        src/proof/abs/absOut.c src/proof/abs/absPth.c src/proof/abs/absRef.c src/proof/abs/absRefSelect.c
+        src/proof/abs/absRpm.c src/proof/abs/absRpmOld.c src/proof/abs/absVta.c src/proof/abs/absUtil.c
+        src/proof/live/liveness.c src/proof/live/liveness_sim.c src/proof/live/ltl_parser.c src/proof/live/kliveness.c
+        src/proof/live/monotone.c src/proof/live/disjunctiveMonotone.c src/proof/live/arenaViolation.c
+        src/proof/live/kLiveConstraints.c src/proof/live/combination.c src/proof/ssc/sscClass.c src/proof/ssc/sscCore.c
+        src/proof/ssc/sscSat.c src/proof/ssc/sscSim.c src/proof/ssc/sscUtil.c src/proof/int/intCheck.c
+        src/proof/int/intContain.c src/proof/int/intCore.c src/proof/int/intCtrex.c src/proof/int/intDup.c
+        src/proof/int/intFrames.c src/proof/int/intInter.c src/proof/int/intM114.c src/proof/int/intMan.c
+        src/proof/int/intUtil.c src/proof/cec/cecCec.c src/proof/cec/cecChoice.c src/proof/cec/cecClass.c
+        src/proof/cec/cecCore.c src/proof/cec/cecCorr.c src/proof/cec/cecIso.c src/proof/cec/cecMan.c
+        src/proof/cec/cecPat.c src/proof/cec/cecSat.c src/proof/cec/cecSatG.c src/proof/cec/cecSeq.c
+        src/proof/cec/cecSolve.c src/proof/cec/cecSplit.c src/proof/cec/cecSynth.c src/proof/cec/cecSweep.c
+        src/proof/acec/acecCl.c src/proof/acec/acecCore.c src/proof/acec/acecCo.c src/proof/acec/acecBo.c
+        src/proof/acec/acecRe.c src/proof/acec/acecPa.c src/proof/acec/acecPo.c src/proof/acec/acecPool.c
+        src/proof/acec/acecCover.c src/proof/acec/acecFadds.c src/proof/acec/acecMult.c src/proof/acec/acecNorm.c
+        src/proof/acec/acecOrder.c src/proof/acec/acecPolyn.c src/proof/acec/acecSt.c src/proof/acec/acecTree.c
+        src/proof/acec/acecUtil.c src/proof/acec/acec2Mult.c src/proof/acec/acecXor.c src/proof/dch/dchAig.c
+        src/proof/dch/dchChoice.c src/proof/dch/dchClass.c src/proof/dch/dchCnf.c src/proof/dch/dchCore.c
+        src/proof/dch/dchMan.c src/proof/dch/dchSat.c src/proof/dch/dchSim.c src/proof/dch/dchSimSat.c
+        src/proof/dch/dchSweep.c src/proof/fraig/fraigApi.c src/proof/fraig/fraigCanon.c src/proof/fraig/fraigFanout.c
+        src/proof/fraig/fraigFeed.c src/proof/fraig/fraigMan.c src/proof/fraig/fraigMem.c src/proof/fraig/fraigNode.c
+        src/proof/fraig/fraigPrime.c src/proof/fraig/fraigSat.c src/proof/fraig/fraigTable.c src/proof/fraig/fraigUtil.c
+        src/proof/fraig/fraigVec.c src/proof/fra/fraBmc.c src/proof/fra/fraCec.c src/proof/fra/fraClass.c
+        src/proof/fra/fraClau.c src/proof/fra/fraClaus.c src/proof/fra/fraCnf.c src/proof/fra/fraCore.c
+        src/proof/fra/fraHot.c src/proof/fra/fraImp.c src/proof/fra/fraInd.c src/proof/fra/fraIndVer.c
+        src/proof/fra/fraLcr.c src/proof/fra/fraMan.c src/proof/fra/fraPart.c src/proof/fra/fraSat.c
+        src/proof/fra/fraSec.c src/proof/fra/fraSim.c src/proof/ssw/sswAig.c src/proof/ssw/sswBmc.c
+        src/proof/ssw/sswClass.c src/proof/ssw/sswCnf.c src/proof/ssw/sswConstr.c src/proof/ssw/sswCore.c
+        src/proof/ssw/sswDyn.c src/proof/ssw/sswFilter.c src/proof/ssw/sswIslands.c src/proof/ssw/sswLcorr.c
+        src/proof/ssw/sswMan.c src/proof/ssw/sswPart.c src/proof/ssw/sswPairs.c src/proof/ssw/sswRarity.c
+        src/proof/ssw/sswSat.c src/proof/ssw/sswSemi.c src/proof/ssw/sswSim.c src/proof/ssw/sswSimSat.c
+        src/proof/ssw/sswSweep.c src/proof/ssw/sswUnique.c)

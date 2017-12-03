@@ -1,16 +1,4 @@
-/*
- * Revision Control Information
- *
- * $Source$
- * $Author$
- * $Revision$
- * $Date$
- *
- */
 #include "espresso.h"
-
-ABC_NAMESPACE_IMPL_START
-
 
 /*
     The cofactor of a cover against a cube "c" is a cover formed by the
@@ -41,9 +29,7 @@ ABC_NAMESPACE_IMPL_START
 
 
 /* cofactor -- compute the cofactor of a cover with respect to a cube */
-pcube *cofactor(T, c)
-IN pcube *T;
-IN register pcube c;
+pcube *cofactor(pset *T, register pset c)
 {
     pcube temp = cube.temp[0], *Tc_save, *Tc, *T1;
     register pcube p;
@@ -90,9 +76,7 @@ IN register pcube c;
     This routine has been optimized for speed.
 */
 
-pcube *scofactor(T, c, var)
-IN pcube *T, c;
-IN int var;
+pcube *scofactor(pset *T, pset c, int var)
 {
     pcube *Tc, *Tc_save;
     register pcube p, mask = cube.temp[1], *T1;
@@ -128,8 +112,7 @@ IN int var;
     return Tc_save;
 }
 
-void massive_count(T)
-IN pcube *T;
+void massive_count(pset *T)
 {
     int *count = cdata.part_zeros;
     pcube *T1;
@@ -232,18 +215,24 @@ IN pcube *T;
 	if (active > mostactive)
 	    best = var, mostactive = active, mostzero = cdata.var_zeros[best],
 	    mostbalanced = maxactive;
-	else if (active == mostactive)
-	{
-	    /* secondary condition is to maximize the number zeros */
-	    /* for binary variables, this is the same as minimum # of 2's */
-	    if (cdata.var_zeros[var] > mostzero)
-		best = var, mostzero = cdata.var_zeros[best],
-		mostbalanced = maxactive;
-	    else if (cdata.var_zeros[var] == mostzero)
-		/* third condition is to pick a balanced variable */
-		/* for binary vars, this means roughly equal # 0's and 1's */
-		if (maxactive < mostbalanced)
-		    best = var, mostbalanced = maxactive;
+	else {
+	    if (active == mostactive)
+	    {
+		/* secondary condition is to maximize the number zeros */
+		/* for binary variables, this is the same as minimum # of 2's */
+		if (cdata.var_zeros[var] > mostzero)
+		    best = var, mostzero = cdata.var_zeros[best],
+		    mostbalanced = maxactive;
+		else {
+		    if (cdata.var_zeros[var] == mostzero)
+		    {
+			/* third condition is to pick a balanced variable */
+			/* for binary vars, this means roughly equal # 0's and 1's */
+			if (maxactive < mostbalanced)
+			    best = var, mostbalanced = maxactive;
+		    }
+		}
+	    }
 	}
 
 	cdata.parts_active[var] = active;
@@ -255,18 +244,15 @@ IN pcube *T;
  }
 }
 
-int binate_split_select(T, cleft, cright, debug_flag)
-IN pcube *T;
-IN register pcube cleft, cright;
-IN int debug_flag;
+int binate_split_select(pset *T, register pset cleft, register pset cright, int debug_flag)
 {
     int best = cdata.best;
     register int i, lastbit = cube.last_part[best], halfbit = 0;
     register pcube cof=T[0];
 
     /* Create the cubes to cofactor against */
-    (void) set_diff(cleft, cube.fullset, cube.var_mask[best]);
-    (void) set_diff(cright, cube.fullset, cube.var_mask[best]);
+    set_diff(cleft, cube.fullset, cube.var_mask[best]);
+    set_diff(cright, cube.fullset, cube.var_mask[best]);
     for(i = cube.first_part[best]; i <= lastbit; i++)
 	if (! is_in_set(cof,i))
 	    halfbit++;
@@ -278,16 +264,15 @@ IN int debug_flag;
 	    set_insert(cright, i);
 
     if (debug & debug_flag) {
-	(void) printf("BINATE_SPLIT_SELECT: split against %d\n", best);
+	printf("BINATE_SPLIT_SELECT: split against %d\n", best);
 	if (verbose_debug)
-	    (void) printf("cl=%s\ncr=%s\n", pc1(cleft), pc2(cright));
+	    printf("cl=%s\ncr=%s\n", pc1(cleft), pc2(cright));
     }
     return best;
 }
 
 
-pcube *cube1list(A)
-pcover A;
+pcube *cube1list(pset_family A)
 {
     register pcube last, p, *plist, *list;
 
@@ -303,8 +288,7 @@ pcover A;
 }
 
 
-pcube *cube2list(A, B)
-pcover A, B;
+pcube *cube2list(pset_family A, pset_family B)
 {
     register pcube last, p, *plist, *list;
 
@@ -323,8 +307,7 @@ pcover A, B;
 }
 
 
-pcube *cube3list(A, B, C)
-pcover A, B, C;
+pcube *cube3list(pset_family A, pset_family B, pset_family C)
 {
     register pcube last, p, *plist, *list;
 
@@ -347,8 +330,7 @@ pcover A, B, C;
 }
 
 
-pcover cubeunlist(A1)
-pcube *A1;
+pcover cubeunlist(pset *A1)
 {
     register int i;
     register pcube p, pdest, cof = A1[0];
@@ -363,16 +345,15 @@ pcube *A1;
     return A;
 }
 
-void simplify_cubelist(T)
-pcube *T;
+void simplify_cubelist(pset *T)
 {
     register pcube *Tdest;
     register int i, ncubes;
 
-    (void) set_copy(cube.temp[0], T[0]);		/* retrieve cofactor */
+    set_copy(cube.temp[0], T[0]);		/* retrieve cofactor */
 
     ncubes = CUBELISTSIZE(T);
-    qsort((char *) (T+2), ncubes, sizeof(pset), (int (*)()) d1_order);
+    qsort((char *) (T+2), ncubes, sizeof(pset), (qsort_compare_func) d1_order);
 
     Tdest = T+2;
     /*   *Tdest++ = T[2];   */
@@ -385,5 +366,3 @@ pcube *T;
     *Tdest++ = NULL;				/* sentinel */
     Tdest[1] = (pcube) Tdest;			/* save pointer to last */
 }
-ABC_NAMESPACE_IMPL_END
-

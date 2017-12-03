@@ -14,18 +14,21 @@
  */
 
 #include "espresso.h"
-#include "base/main/main.h"
-
-ABC_NAMESPACE_IMPL_START
-		/* table definitions for options */
+#include "main.h"		/* table definitions for options */
+#include <unistd.h>
 
 static FILE *last_fp;
 static int input_type = FD_type;
 
+void getPLA(int opt, int argc, char **argv, int option, pPLA *PLA, int out_type);
+void delete_arg(int *argc, register char **argv, int num);
+void init_runtime(void);
+void backward_compatibility_hack(int *argc, char **argv, int *option, int *out_type);
+void runtime(void);
+void usage(void);
+bool check_arg(int *argc, register char **argv, register char *s);
 
-main(argc, argv)
-int argc;
-char *argv[];
+int main(int argc, char **argv)
 {
     int i, j, first, last, strategy, out_type, option;
     pPLA PLA, PLA1;
@@ -34,8 +37,8 @@ char *argv[];
     cost_t cost;
     bool error, exact_cover;
     long start;
-    extern char *util_optarg;
-    extern int util_optind;
+    extern char *optarg;
+    extern int optind;
 
     start = ptime();
 
@@ -72,46 +75,46 @@ char *argv[];
 
 
     /* parse command line options*/
-    while ((i = util_getopt(argc, argv, "D:S:de:o:r:stv:x")) != EOF) {
+    while ((i = getopt(argc, argv, "D:S:de:o:r:stv:x")) != EOF) {
 	switch(i) {
 	    case 'D':		/* -Dcommand invokes a subcommand */
 		for(j = 0; option_table[j].name != 0; j++) {
-		    if (strcmp(util_optarg, option_table[j].name) == 0) {
+		    if (strcmp(optarg, option_table[j].name) == 0) {
 			option = j;
 			break;
 		    }
 		}
 		if (option_table[j].name == 0) {
-		    (void) fprintf(stderr, "%s: bad subcommand \"%s\"\n",
-			argv[0], util_optarg);
+		    fprintf(stderr, "%s: bad subcommand \"%s\"\n",
+			argv[0], optarg);
 		    exit(1);
 		}
 		break;
 
 	    case 'o':		/* -ooutput selects and output option */
 		for(j = 0; pla_types[j].key != 0; j++) {
-		    if (strcmp(util_optarg, pla_types[j].key+1) == 0) {
+		    if (strcmp(optarg, pla_types[j].key+1) == 0) {
 			out_type = pla_types[j].value;
 			break;
 		    }
 		}
 		if (pla_types[j].key == 0) {
-		    (void) fprintf(stderr, "%s: bad output type \"%s\"\n",
-			argv[0], util_optarg);
+		    fprintf(stderr, "%s: bad output type \"%s\"\n",
+			argv[0], optarg);
 		    exit(1);
 		}
 		break;
 
 	    case 'e':		/* -eespresso selects an option for espresso */
 		for(j = 0; esp_opt_table[j].name != 0; j++) {
-		    if (strcmp(util_optarg, esp_opt_table[j].name) == 0) {
+		    if (strcmp(optarg, esp_opt_table[j].name) == 0) {
 			*(esp_opt_table[j].variable) = esp_opt_table[j].value;
 			break;
 		    }
 		}
 		if (esp_opt_table[j].name == 0) {
-		    (void) fprintf(stderr, "%s: bad espresso option \"%s\"\n",
-			argv[0], util_optarg);
+		    fprintf(stderr, "%s: bad espresso option \"%s\"\n",
+			argv[0], optarg);
 		    exit(1);
 		}
 		break;
@@ -125,14 +128,14 @@ char *argv[];
 	    case 'v':		/* -vdebug invokes a debug option */
 		verbose_debug = TRUE;
 		for(j = 0; debug_table[j].name != 0; j++) {
-		    if (strcmp(util_optarg, debug_table[j].name) == 0) {
+		    if (strcmp(optarg, debug_table[j].name) == 0) {
 			debug |= debug_table[j].value;
 			break;
 		    }
 		}
 		if (debug_table[j].name == 0) {
-		    (void) fprintf(stderr, "%s: bad debug type \"%s\"\n",
-			argv[0], util_optarg);
+		    fprintf(stderr, "%s: bad debug type \"%s\"\n",
+			argv[0], optarg);
 		    exit(1);
 		}
 		break;
@@ -150,13 +153,13 @@ char *argv[];
 		break;
 
 	    case 'S':		/* -S sets a strategy for several cmds */
-		strategy = atoi(util_optarg);
+		strategy = atoi(optarg);
 		break;
 
 	    case 'r':		/* -r selects range (outputs or vars) */
-		if (sscanf(util_optarg, "%d-%d", &first, &last) < 2) {
-		    (void) fprintf(stderr, "%s: bad output range \"%s\"\n",
-			argv[0], util_optarg);
+		if (sscanf(optarg, "%d-%d", &first, &last) < 2) {
+		    fprintf(stderr, "%s: bad output range \"%s\"\n",
+			argv[0], optarg);
 		    exit(1);
 		}
 		break;
@@ -178,20 +181,20 @@ char *argv[];
 	printf("# %s\n", VERSION);
     }
 
-    /* the remaining arguments are argv[util_optind ... argc-1] */
+    /* the remaining arguments are argv[optind ... argc-1] */
     PLA = PLA1 = NIL(PLA_t);
     switch(option_table[option].num_plas) {
 	case 2:
-	    if (util_optind+2 < argc) fatal("trailing arguments on command line");
-	    getPLA(util_optind++, argc, argv, option, &PLA, out_type);
-	    getPLA(util_optind++, argc, argv, option, &PLA1, out_type);
+	    if (optind+2 < argc) fatal("trailing arguments on command line");
+	    getPLA(optind++, argc, argv, option, &PLA, out_type);
+	    getPLA(optind++, argc, argv, option, &PLA1, out_type);
 	    break;
 	case 1:
-	    if (util_optind+1 < argc) fatal("trailing arguments on command line");
-	    getPLA(util_optind++, argc, argv, option, &PLA, out_type);
+	    if (optind+1 < argc) fatal("trailing arguments on command line");
+	    getPLA(optind++, argc, argv, option, &PLA, out_type);
 	    break;
     }
-    if (util_optind < argc) fatal("trailing arguments on command line");
+    if (optind < argc) fatal("trailing arguments on command line");
 
     if (summary || trace) {
 	if (PLA != NIL(PLA_t)) PLA_summary(PLA);
@@ -312,7 +315,18 @@ char *argv[];
 	print_solution = FALSE;
 	break;
 
-
+    case KEY_signature:
+	Fold = sf_save(PLA->F);
+	PLA->F = signature(PLA->F, PLA->D, PLA->R);
+	EXECUTE(error=verify(PLA->F,Fold,PLA->D), VERIFY_TIME, PLA->F, cost);
+	if (error) {
+	    print_solution = FALSE;
+	    PLA->F = Fold;
+	    (void) check_consistency(PLA);
+	} else {
+	    free_cover(Fold);
+	}
+	break;
 
 /******************** Output phase and bit pairing ********************/
 
@@ -518,16 +532,11 @@ char *argv[];
     sm_cleanup();               /* sparse matrix cleanup */
 
     exit(0);
+    return 0;
 }
 
 
-getPLA(opt, argc, argv, option, PLA, out_type)
-int opt;
-int argc;
-char *argv[];
-int option;
-pPLA *PLA;
-int out_type;
+void getPLA(int opt, int argc, char **argv, int option, pPLA *PLA, int out_type)
 {
     FILE *fp;
     int needs_dcset, needs_offset;
@@ -541,7 +550,7 @@ int out_type;
 	if (strcmp(fname, "-") == 0) {
 	    fp = stdin;
 	} else if ((fp = fopen(argv[opt], "r")) == NULL) {
-	    (void) fprintf(stderr, "%s: Unable to open %s\n", argv[0], fname);
+	    fprintf(stderr, "%s: Unable to open %s\n", argv[0], fname);
 	    exit(1);
 	}
     }
@@ -554,10 +563,10 @@ int out_type;
     }
 
     if (read_pla(fp, needs_dcset, needs_offset, input_type, PLA) == EOF) {
-	(void) fprintf(stderr, "%s: Unable to find PLA on file %s\n", argv[0], fname);
+	fprintf(stderr, "%s: Unable to find PLA on file %s\n", argv[0], fname);
 	exit(1);
     }
-    (*PLA)->filename = util_strsav(fname);
+    (*PLA)->filename = strdup(fname);
     filename = (*PLA)->filename;
 /*    (void) fclose(fp);*/
 /* hackto support -Dmany */
@@ -565,7 +574,7 @@ int out_type;
 }
 
 
-runtime()
+void runtime(void)
 {
     int i;
     long total = 1, temp;
@@ -584,7 +593,7 @@ runtime()
 }
 
 
-init_runtime()
+void init_runtime(void)
 {
     total_name[READ_TIME] =     "READ       ";
     total_name[WRITE_TIME] =    "WRITE      ";
@@ -604,7 +613,7 @@ init_runtime()
 }
 
 
-subcommands()
+void subcommands(void)
 {
     int i, col;
     printf("                ");
@@ -623,7 +632,7 @@ subcommands()
 }
 
 
-usage()
+void usage(void)
 {
     printf("%s\n\n", VERSION);
     printf("SYNOPSIS: espresso [options] [file]\n\n");
@@ -656,11 +665,7 @@ usage()
  *  Hack for backward compatibility (ACK! )
  */
 
-backward_compatibility_hack(argc, argv, option, out_type)
-int *argc;
-char **argv;
-int *option;
-int *out_type;
+void backward_compatibility_hack(int *argc, char **argv, int *option, int *out_type)
 {
     int i, j;
 
@@ -676,7 +681,7 @@ int *out_type;
 		    break;
 		}
 	    if (option_table[j].name == 0) {
-		(void) fprintf(stderr,
+		fprintf(stderr,
 		 "espresso: bad keyword \"%s\" following -do\n",argv[i+1]);
 		exit(1);
 	    }
@@ -694,7 +699,7 @@ int *out_type;
 		    break;
 		}
 	    if (pla_types[j].key == 0) {
-		(void) fprintf(stderr,
+		fprintf(stderr,
 		   "espresso: bad keyword \"%s\" following -out\n",argv[i+1]);
 		exit(1);
 	    }
@@ -721,9 +726,7 @@ int *out_type;
 
 
 /* delete_arg -- delete an argument from the argument list */
-delete_arg(argc, argv, num)
-int *argc, num;
-register char *argv[];
+void delete_arg(int *argc, register char **argv, int num)
 {
     register int i;
     (*argc)--;
@@ -734,9 +737,7 @@ register char *argv[];
 
 
 /* check_arg -- scan argv for an argument, and return TRUE if found */
-bool check_arg(argc, argv, s)
-int *argc;
-register char *argv[], *s;
+bool check_arg(int *argc, register char **argv, register char *s)
 {
     register int i;
     for(i = 1; i < *argc; i++) {
@@ -747,5 +748,3 @@ register char *argv[], *s;
     }
     return FALSE;
 }
-ABC_NAMESPACE_IMPL_END
-
